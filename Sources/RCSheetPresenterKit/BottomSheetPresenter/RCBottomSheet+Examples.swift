@@ -218,6 +218,7 @@ class SampleParentViewModel: ObservableObject {
     RCPreviewer { navigationController in
         let viewModel = SampleParentViewModel(navigationController: navigationController)
         let viewController = UIHostingController(rootView: SampleParentView(viewModel: viewModel))
+
         return viewController
     }
     .ignoresSafeArea()

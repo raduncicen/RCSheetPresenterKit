@@ -10,7 +10,7 @@ import SwiftUI
 public class RCBottomSheetPresenter {
     let navigationController: UINavigationController
 
-    var ios16Plus: Bool = {
+    static var ios16Plus: Bool = {
         if #available(iOS 16.0, *) {
             return true
         } else {
@@ -26,6 +26,13 @@ public class RCBottomSheetPresenter {
 
 extension RCBottomSheetPresenter {
 
+    /// Presents a sheet over the given navigationController
+    /// - Parameters:
+    ///   - view: SwiftUI view which you want to present. Self-sizing detent is automatically supported if enabled.
+    ///   - detentConfiguration: Contains the sizing options for the sheet
+    ///   - uiConfiguration: Contains the configurable UI and interaction options
+    ///   - completion: Default iOS completion call for presenting a viewController
+    /// - Returns: A tuple which contains the sheet's sheetPresentationController and a dictionary which maps the defined detents to the corresponding iOS detents. You can use these two parameters to set the `selectedDetentIdentifier` of the sheet or perform additional configurations at any given point.
     @discardableResult
     public func presentBottomSheet<Content: View>(
         view: Content,
@@ -49,6 +56,14 @@ extension RCBottomSheetPresenter {
         )
     }
 
+
+    /// Presents a sheet over the given navigationController
+    /// - Parameters:
+    ///   - viewController: ViewController to present. Use `RCSelfSizingViewControllerProtocol` or `RCSelfSizingHostingController` in order to use `.selfSizing` detent.
+    ///   - detentConfiguration: Contains the sizing options for the sheet
+    ///   - uiConfiguration: Contains the configurable UI and interaction options
+    ///   - completion: Default iOS completion call for presenting a viewController
+    /// - Returns: A tuple which contains the sheet's sheetPresentationController and a dictionary which maps the defined detents to the corresponding iOS detents. You can use these two parameters to set the `selectedDetentIdentifier` of the sheet or perform additional configurations at any given point.
     @discardableResult
     public func presentBottomSheet(
         viewController: UIViewController,
@@ -57,11 +72,37 @@ extension RCBottomSheetPresenter {
         completion: (() -> Void)? = nil
     ) -> (sheetPresentationController: UISheetPresentationController?, detentToSheetDetentDictionary: [Detent : UISheetPresentationController.Detent])
     {
+        Self.presentBottomSheet(
+            presentOn: navigationController,
+            present: viewController,
+            detentConfiguration: detentConfiguration,
+            uiConfiguration: uiConfiguration,
+            completion: completion
+        )
+    }
+
+    /// Presents a sheet over the `presentOn` viewController
+    /// - Parameters:
+    ///   - presentOn: The ViewController (or NavigationController) you want the sheet to be presentedOn
+    ///   - present: ViewController to present. Use `RCSelfSizingViewControllerProtocol` or `RCSelfSizingHostingController` in order to use `.selfSizing` detent.
+    ///   - detentConfiguration: Contains the sizing options for the sheet
+    ///   - uiConfiguration: Contains the configurable UI and interaction options
+    ///   - completion: Default iOS completion call for presenting a viewController
+    /// - Returns: A tuple which contains the sheet's sheetPresentationController and a dictionary which maps the defined detents to the corresponding iOS detents. You can use these two parameters to set the `selectedDetentIdentifier` of the sheet or perform additional configurations at any given point.
+    @discardableResult
+    public static func presentBottomSheet(
+        presentOn viewControllerToPresentFrom: UIViewController,
+        present viewControllerToPresent: UIViewController,
+        detentConfiguration: DetentConfiguration,
+        uiConfiguration: UIConfiguration,
+        completion: (() -> Void)? = nil
+    ) -> (sheetPresentationController: UISheetPresentationController?, detentToSheetDetentDictionary: [Detent : UISheetPresentationController.Detent])
+    {
         // Set the presentation style for the bottom sheet
-        viewController.modalPresentationStyle = .pageSheet
-        viewController.isModalInPresentation = !uiConfiguration.enableInteractiveDismiss
+        viewControllerToPresent.modalPresentationStyle = .pageSheet
+        viewControllerToPresent.isModalInPresentation = !uiConfiguration.enableInteractiveDismiss
         /// - Warning: SheetControler must be defined after setting the modalPresentationStyle
-        let sheetController = viewController.sheetPresentationController
+        let sheetController = viewControllerToPresent.sheetPresentationController
         sheetController?.prefersGrabberVisible = uiConfiguration.showsGrabIndicator
         sheetController?.preferredCornerRadius = uiConfiguration.preferredCornerRadius
 
@@ -70,7 +111,7 @@ extension RCBottomSheetPresenter {
 
         var selfSizingDetentIndex: Int?
         /// Configure the selfSizing detent if the viewController conforms to `RCSelfSizingViewControllerProtocol`
-        if ios16Plus, let selfSizingViewController = viewController as? RCSelfSizingViewControllerProtocol {
+        if ios16Plus, let selfSizingViewController = viewControllerToPresent as? RCSelfSizingViewControllerProtocol {
             let calculatedSelfSizingHeight = selfSizingViewController.preferredContentSize.height.rounded()
             selfSizingDetentIndex = handleSelfSizingDetentIfExists(&localDetents, calculatedHeight: calculatedSelfSizingHeight)
         }
@@ -96,13 +137,13 @@ extension RCBottomSheetPresenter {
         }
 
         // Present the view controller on the navigation controller
-        navigationController.present(viewController, animated: true, completion: completion)
+        viewControllerToPresentFrom.present(viewControllerToPresent, animated: true, completion: completion)
         return (sheetController, detentToSheetDetentDictionary)
     }
 
 
     /// Replaces ios16+ detents with their fallback values.
-    private func replaceWithFallbackDetentsIfNeeded(_ detents: inout [Detent]) {
+    private static func replaceWithFallbackDetentsIfNeeded(_ detents: inout [Detent]) {
         guard !ios16Plus else { return }
 
         detents = detents.compactMap { detent in
@@ -123,7 +164,7 @@ extension RCBottomSheetPresenter {
     ///   - detents: The detents which are enabled.
     ///   - calculatedHeight: The estimated view height of the viewController
     /// - Returns: The detent created for selfSizing type. This could be helpful if you are planning to use its identifier to configure thing like largestUndimmedDetent
-    private func handleSelfSizingDetentIfExists(_ detents: inout [Detent], calculatedHeight: CGFloat) -> Int? {
+    private static func handleSelfSizingDetentIfExists(_ detents: inout [Detent], calculatedHeight: CGFloat) -> Int? {
         if let selfSizingDetentIndex = detents.firstIndex(of: .selfSizing(fallback: .medium)) {
             let detent = Detent.custom(height: calculatedHeight, fallBack: .medium)
             detents.remove(at: selfSizingDetentIndex)
@@ -140,7 +181,7 @@ extension RCBottomSheetPresenter {
     }
 
     /// Assigns the `largestUndimmedDetentIdentifier` for the current configuration if enabled.
-    private func handleLargestUndimmedDetent(sheetController: UISheetPresentationController?, type: DetentConfiguration.UndimmedDetentStyle, detents: [Detent], selfSizingDetentIndex: Int?) {
+    private static func handleLargestUndimmedDetent(sheetController: UISheetPresentationController?, type: DetentConfiguration.UndimmedDetentStyle, detents: [Detent], selfSizingDetentIndex: Int?) {
         if #available(iOS 16.0, *) {
             guard let sheetController else { return }
 

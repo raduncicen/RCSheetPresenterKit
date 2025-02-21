@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-protocol RCSelfSizingViewControllerProtocol: UIViewController {
-    func updatePreferredContentSize()
-}
-
 public class RCSelfSizingHostingController<Content: View>: UIHostingController<Content>, RCSelfSizingViewControllerProtocol {
 
     public override init(rootView: Content) {
