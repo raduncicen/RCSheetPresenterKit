@@ -29,7 +29,7 @@ extension RCImagePickerPresenter {
         imagePickerCoordinatorHandler = nil
     }
 
-    func presentImagePicker(
+    public func presentImagePicker(
         on viewController: UIViewController,
         sourceType: RCImagePickerSource,
         completion: @escaping (ImagePickerResult) -> Void

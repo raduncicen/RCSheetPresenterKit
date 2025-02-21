@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "RCPreviewKit",
+        "repositoryURL": "https://github.com/raduncicen/RCPreviewKit",
+        "state": {
+          "branch": "main",
+          "revision": "ce66ec42849e7a26a0e0f538675892b7d9baf64d",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

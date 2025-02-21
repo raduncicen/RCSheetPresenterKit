@@ -11,21 +11,21 @@ import UIKit
 import CoreGraphics
 import AVFoundation
 
-class PDFHelper {
+public class PDFHelper {
 
-    func pdfDocument(url: URL) -> PDFDocument? {
+    public func pdfDocument(url: URL) -> PDFDocument? {
         PDFDocument(url: url)
     }
 
-    func pdfDocument(data: Data) -> PDFDocument? {
+    public func pdfDocument(data: Data) -> PDFDocument? {
         PDFDocument(data: data)
     }
 
-    func pageCount(pdfUrl: URL) -> Int? {
+    public func pageCount(pdfUrl: URL) -> Int? {
         PDFDocument(url: pdfUrl)?.pageCount
     }
 
-    func pageCount(pdfData: Data) -> Int? {
+    public func pageCount(pdfData: Data) -> Int? {
         PDFDocument(data: pdfData)?.pageCount
     }
 
@@ -35,7 +35,7 @@ class PDFHelper {
     ///   - pdfData: The PDF data to be converted.
     ///   - compressionQuality: The quality of the images extracted (0.0 to 1.0).
     /// - Returns: An array of UIImage objects representing each page of the PDF.
-    func pdfImages(from pdfData: Data, compressionQuality: CGFloat = 1.0) -> [UIImage]? {
+    public func pdfImages(from pdfData: Data, compressionQuality: CGFloat = 1.0) -> [UIImage]? {
         autoreleasepool {
             guard let pdfDocument = PDFDocument(data: pdfData), pdfDocument.pageCount > 0 else {
                 return nil
@@ -48,7 +48,7 @@ class PDFHelper {
             for pageIndex in 0..<pdfDocument.pageCount {
                 guard let page = pdfDocument.page(at: pageIndex) else { continue }
 
-                var pageRect = page.bounds(for: .mediaBox)
+                let pageRect = page.bounds(for: .mediaBox)
                 let scaleFactor: CGFloat = 1.0
 
                 // Reuse renderer when possible to prevent memory spike
@@ -83,7 +83,7 @@ class PDFHelper {
     ///   - images: The array of UIImage objects to be converted.
     ///   - compressionQuality: The quality of the images within the PDF (0.0 to 1.0).
     /// - Returns: PDF data representing the images.
-    func pdfData(from images: [UIImage], compressionQuality: CGFloat = 1.0) -> Data? {
+    public func pdfData(from images: [UIImage], compressionQuality: CGFloat = 1.0) -> Data? {
         autoreleasepool {
             let pdfPageBounds = CGRect(x: 0, y: 0, width: 595.2, height: 841.8) // A4 size at 72 DPI
             let renderer = UIGraphicsPDFRenderer(bounds: pdfPageBounds)
@@ -107,7 +107,7 @@ class PDFHelper {
         }
     }
 
-    func compressPDF(_ originalURL: URL, compressionQuality: CGFloat = 0.8) -> (Data, [UIImage])? {
+    public func compressPDF(_ originalURL: URL, compressionQuality: CGFloat = 0.8) -> (Data, [UIImage])? {
         guard let originalPdfData = try? Data(contentsOf: originalURL) else {
             return nil
         }
@@ -124,7 +124,7 @@ class PDFHelper {
     /// - Parameters:
     ///   - pdfData: The PDF data to be shared.
     ///   - viewController: The UIViewController from which to present the share sheet.
-    func presentShareSheet(forPDFData pdfData: Data, from viewController: UIViewController) {
+    public func presentShareSheet(forPDFData pdfData: Data, from viewController: UIViewController) {
         let activityViewController = UIActivityViewController(activityItems: [pdfData], applicationActivities: nil)
 
         // Exclude irrelevant activity types if desired

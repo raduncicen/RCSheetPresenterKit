@@ -29,7 +29,7 @@ extension RCDocumentPickerPresenter {
         documentPickerCoordinatorHandler = nil
     }
 
-    func presentDocumentPicker(
+    public func presentDocumentPicker(
         on viewController: UIViewController,
         allowedTypes: [UTType],
         allowsMultipleSelection: Bool = false,

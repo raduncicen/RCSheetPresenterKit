@@ -9,10 +9,10 @@ import UIKit
 
 public protocol RCActionSheetPresenter {}
 
-public extension RCActionSheetPresenter {
+extension RCActionSheetPresenter {
 
     // Function to present an action sheet
-    func presentActionSheet(
+    public func presentActionSheet(
         on viewController: UIViewController,
         title: String? = nil,
         message: String? = nil,

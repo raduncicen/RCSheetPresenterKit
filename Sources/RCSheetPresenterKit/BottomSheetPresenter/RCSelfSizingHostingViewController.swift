@@ -7,9 +7,13 @@
 
 import SwiftUI
 
-class RCSelfSizingHostingController<Content: View>: UIHostingController<Content> {
+protocol RCSelfSizingViewControllerProtocol: UIViewController {
+    func updatePreferredContentSize()
+}
 
-    override init(rootView: Content) {
+public class RCSelfSizingHostingController<Content: View>: UIHostingController<Content>, RCSelfSizingViewControllerProtocol {
+
+    public override init(rootView: Content) {
         super.init(rootView: rootView)
         self.updatePreferredContentSize()
     }
@@ -18,12 +22,12 @@ class RCSelfSizingHostingController<Content: View>: UIHostingController<Content>
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         self.updatePreferredContentSize()
     }
 
-    private func updatePreferredContentSize() {
+    public func updatePreferredContentSize() {
         let width = UIScreen.main.bounds.width
         let height = RCSwiftUIViewSizeCalculator.calculateHeight(for: self.rootView, width: width)
         // Setting the preferredContentSize which will be used for determining the sheetSize.

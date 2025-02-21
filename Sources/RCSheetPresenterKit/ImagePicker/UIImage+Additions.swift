@@ -14,7 +14,7 @@ extension UIImage {
     ///   - preferredCompression: The initial compression quality (default is 0.7).
     ///   - compressionStep: The step by which to reduce compression quality (default is 0.1).
     /// - Returns: The compressed image data or `nil` if compression fails.
-    func compressToJpeg(
+    public func compressToJpeg(
         maxFileSizeInMB: Double? = nil,
         preferredCompression: CGFloat = 0.7,
         compressionStep: CGFloat = 0.1
