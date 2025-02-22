@@ -31,7 +31,7 @@ extension RCBottomSheetPresenter {
         /// Requires your viewController to conform to `RCSelfSizingViewControllerProtocol` or use `RCSelfSizingHostingController` in for selfSizing to function properly. If iOS version is below 16, a fallback detent is used.
         case selfSizing(fallback: DetentFallBack)
 
-        var detent: UISheetPresentationController.Detent? {
+        public var detent: UISheetPresentationController.Detent? {
             switch self {
             case .medium:
                 return .medium()
@@ -56,7 +56,7 @@ extension RCBottomSheetPresenter {
             case medium
             case large
 
-            var detent: Detent {
+            public var detent: Detent {
                 switch self {
                 case .medium:
                     return .medium
@@ -65,7 +65,7 @@ extension RCBottomSheetPresenter {
                 }
             }
 
-            var sheetDetent: UISheetPresentationController.Detent {
+            public var sheetDetent: UISheetPresentationController.Detent {
                 switch self {
                 case .medium:
                     return .medium()
@@ -102,6 +102,11 @@ extension RCBottomSheetPresenter {
             /// - Note: `DetentConfiguration.detents` array should also include the same detent for this to work,
             case detent(Detent)
         }
+
+        public init(detents: [Detent], largestUndimmedDetent: UndimmedDetentStyle) {
+            self.detents = detents
+            self.largestUndimmedDetent = largestUndimmedDetent
+        }
     }
 
     public struct UIConfiguration {
@@ -111,5 +116,11 @@ extension RCBottomSheetPresenter {
         public var enableInteractiveDismiss: Bool = true
         /// The corner radius for the bottom sheet. Defaults to `32`.
         public var preferredCornerRadius: CGFloat = 32
+
+        public init(showsGrabIndicator: Bool, enableInteractiveDismiss: Bool, preferredCornerRadius: CGFloat) {
+            self.showsGrabIndicator = showsGrabIndicator
+            self.enableInteractiveDismiss = enableInteractiveDismiss
+            self.preferredCornerRadius = preferredCornerRadius
+        }
     }
 }

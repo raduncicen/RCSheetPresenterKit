@@ -19,7 +19,7 @@ public class RCBottomSheetPresenter {
     }()
 
     /// - Parameter navigationController: The navigationController in which the bottomSheet will be presented on.
-    init(navigationController: UINavigationController) {
+    public init(navigationController: UINavigationController) {
         self.navigationController = navigationController
     }
 }

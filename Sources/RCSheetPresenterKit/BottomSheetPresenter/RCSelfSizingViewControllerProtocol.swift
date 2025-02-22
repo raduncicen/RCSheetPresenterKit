@@ -6,6 +6,6 @@
 //
 import UIKit
 
-protocol RCSelfSizingViewControllerProtocol: UIViewController {
+public protocol RCSelfSizingViewControllerProtocol: UIViewController {
     func updatePreferredContentSize()
 }
