@@ -106,22 +106,27 @@ extension RCBottomSheetPresenter {
         sheetController?.prefersGrabberVisible = uiConfiguration.showsGrabIndicator
         sheetController?.preferredCornerRadius = uiConfiguration.preferredCornerRadius
 
-        var localDetents = Array(Set(detentConfiguration.detents))
+        var localDetents = detentConfiguration.detents
         replaceWithFallbackDetentsIfNeeded(&localDetents)
+        localDetents = Array(Set(localDetents)) // Remove the duplicate detents
 
-        var selfSizingDetentIndex: Int?
+        var selfSizingTuple: (selfSizingDetentIndex: Int, selfSizingDetent: Detent)?
+
         /// Configure the selfSizing detent if the viewController conforms to `RCSelfSizingViewControllerProtocol`
         if ios16Plus, let selfSizingViewController = viewControllerToPresent as? RCSelfSizingViewControllerProtocol {
             let calculatedSelfSizingHeight = selfSizingViewController.preferredContentSize.height.rounded()
-            selfSizingDetentIndex = handleSelfSizingDetentIfExists(&localDetents, calculatedHeight: calculatedSelfSizingHeight)
+            selfSizingTuple = handleSelfSizingDetentIfExists(&localDetents, calculatedHeight: calculatedSelfSizingHeight)
         }
 
         /// Assign sheet detents
         /// - Warning: Make sure to always set the final detent values before querying for largestUndimmedDetent. This is need for detent identifiers to sustain and match.
         let sheetDetents = localDetents.compactMap(\.detent)
         let detentToSheetDetentDictionary = Dictionary(uniqueKeysWithValues: localDetents.enumerated().compactMap {
-            if ios16Plus, $0.offset == selfSizingDetentIndex {
-                return (detentConfiguration.detents[$0.offset], sheetDetents[$0.offset])
+            if ios16Plus,
+               $0.offset == selfSizingTuple?.selfSizingDetentIndex,
+               let selfSizingDetent = selfSizingTuple?.selfSizingDetent
+            {
+                return (selfSizingDetent, sheetDetents[$0.offset])
             }
             return ($0.element, sheetDetents[$0.offset])
         })
@@ -132,7 +137,7 @@ extension RCBottomSheetPresenter {
                 sheetController: sheetController,
                 type: detentConfiguration.largestUndimmedDetent,
                 detents: localDetents,
-                selfSizingDetentIndex: selfSizingDetentIndex
+                selfSizingDetentIndex: selfSizingTuple?.selfSizingDetentIndex
             )
         }
 
@@ -164,18 +169,19 @@ extension RCBottomSheetPresenter {
     ///   - detents: The detents which are enabled.
     ///   - calculatedHeight: The estimated view height of the viewController
     /// - Returns: The detent created for selfSizing type. This could be helpful if you are planning to use its identifier to configure thing like largestUndimmedDetent
-    private static func handleSelfSizingDetentIfExists(_ detents: inout [Detent], calculatedHeight: CGFloat) -> Int? {
-        if let selfSizingDetentIndex = detents.firstIndex(of: .selfSizing(fallback: .medium)) {
-            let detent = Detent.custom(height: calculatedHeight, fallBack: .medium)
+    private static func handleSelfSizingDetentIfExists(_ detents: inout [Detent], calculatedHeight: CGFloat) -> (selfSizingDetentIndex: Int, selfSizingDetent: Detent)? {
+        guard let selfSizingDetentIndex = detents.firstIndex(where: { $0.isSelfSizingDetent }) else {
+            return nil
+        }
+
+        switch detents[selfSizingDetentIndex] {
+        case .selfSizing(fallback: let fallBack):
+            let detent = Detent.custom(height: calculatedHeight, fallBack: fallBack)
             detents.remove(at: selfSizingDetentIndex)
             detents.insert(detent, at: selfSizingDetentIndex)
-            return selfSizingDetentIndex
-        } else if let selfSizingDetentIndex = detents.firstIndex(of: .selfSizing(fallback: .large)) {
-            let detent = Detent.custom(height: calculatedHeight, fallBack: .large)
-            detents.remove(at: selfSizingDetentIndex)
-            detents.insert(detent, at: selfSizingDetentIndex)
-            return selfSizingDetentIndex
-        } else {
+            return (selfSizingDetentIndex, .selfSizing(fallback: fallBack))
+
+        default:
             return nil
         }
     }

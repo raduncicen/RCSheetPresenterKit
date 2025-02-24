@@ -52,6 +52,13 @@ extension RCBottomSheetPresenter {
             }
         }
 
+        var isSelfSizingDetent: Bool {
+            if self == .selfSizing(fallback: .medium) || self == .selfSizing(fallback: .large) {
+                return true
+            }
+            return false
+        }
+
         public enum DetentFallBack: Equatable, Hashable {
             case medium
             case large
