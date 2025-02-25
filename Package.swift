@@ -13,7 +13,7 @@ let package = Package(
             targets: ["RCSheetPresenterKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/raduncicen/RCPreviewKit", .branchItem("main"))
+        .package(url: "https://github.com/raduncicen/RCPreviewKit", .upToNextMajor(from: "1.0.0"))
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
