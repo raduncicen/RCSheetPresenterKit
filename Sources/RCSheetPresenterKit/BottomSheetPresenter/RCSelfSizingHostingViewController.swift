@@ -7,14 +7,14 @@
 
 import SwiftUI
 
-public class RCSelfSizingHostingController<Content: View>: UIHostingController<Content>, RCSelfSizingViewControllerProtocol {
+open class RCSelfSizingHostingController<Content: View>: UIHostingController<Content>, RCSelfSizingViewControllerProtocol {
 
     public override init(rootView: Content) {
         super.init(rootView: rootView)
         self.updatePreferredContentSize()
     }
 
-    @objc required dynamic init?(coder aDecoder: NSCoder) {
+    @objc required dynamic public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
