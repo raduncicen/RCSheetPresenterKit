@@ -73,7 +73,7 @@ extension RCBottomSheetPresenter {
     ) -> (sheetPresentationController: UISheetPresentationController?, detentToSheetDetentDictionary: [Detent : UISheetPresentationController.Detent])
     {
         Self.presentBottomSheet(
-            presentOn: navigationController,
+            presentOn: topViewController(of: navigationController) ?? navigationController,
             present: viewController,
             detentConfiguration: detentConfiguration,
             uiConfiguration: uiConfiguration,
@@ -202,5 +202,46 @@ extension RCBottomSheetPresenter {
                 break
             }
         }
+    }
+}
+
+
+fileprivate extension RCBottomSheetPresenter {
+
+    /// Find the topMostViewController for the given viewController.
+    func topViewController(of viewController: UIViewController? = nil) -> UIViewController? {
+        guard let viewController else { return nil }
+
+        if let nav = viewController as? UINavigationController {
+            return topViewController(of: nav.visibleViewController)
+        }
+
+        if let tab = viewController as? UITabBarController {
+            if let selected = tab.selectedViewController {
+                return topViewController(of: selected)
+            }
+        }
+
+        if let presented = viewController.presentedViewController {
+            return topViewController(of: presented)
+        }
+
+        // Handle Split View Controller
+        if let split = viewController as? UISplitViewController {
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                // iPad için detay viewController'ı döndür
+                if let detailNav = split.viewControllers.last as? UINavigationController {
+                    return topViewController(of: detailNav.visibleViewController)
+                }
+                return topViewController(of: split.viewControllers.last)
+            }
+            // iPhone için primary viewController'ı döndür
+            if let primaryNav = split.viewControllers.first as? UINavigationController {
+                return topViewController(of: primaryNav.visibleViewController)
+            }
+            return topViewController(of: split.viewControllers.first)
+        }
+
+        return viewController
     }
 }
